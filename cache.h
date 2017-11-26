@@ -82,6 +82,7 @@ private:
     bool AfterFetachRequest(line* visitedLine, int read, int bytes,
                      char *content);
 
+    uint64_t getRES(uint64_t addr, int rshift, int t);
 
     // Prefetching
     int PrefetchDecision();
@@ -98,8 +99,8 @@ private:
     // int E;
     // int B;
     uint64_t request_tag;
-    int request_s;
-    int request_offset;
+    uint64_t request_s;
+    uint64_t request_offset;
     DISALLOW_COPY_AND_ASSIGN(Cache);
 };
 

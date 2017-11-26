@@ -61,10 +61,18 @@ int main(void) {
     uint64_t addr;
     int read;
     while(trace_file >> c >> addr) {
-        read = (c == 'r' ? 1:0);
+        //read = (c == 'r' ? 1:0);
+        if (c=='r')
+        {
+            read = 1;
+        }
+        else
+            read = 0;
+        printf("\n%c  %x\n", c, addr);
+        
         l1.HandleRequest(addr, 0, read, content, hit, time);
 
-        printf("\n%c  %llu\n", c, addr);
+        
         printf("Request access time: %dns\n", time);
     }
 

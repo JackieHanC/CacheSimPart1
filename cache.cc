@@ -17,8 +17,10 @@ void set::init(int associativity, int b) {
 }
 
 void set::setHead(line *visitedLine) {
+    printf("Set Head\n");
     bool inList = false;
     line *tmp = this->head;
+    printf("Here4\n");
     while(tmp != NULL) {
         // the visited line is in this set
         if (visitedLine == tmp) {
@@ -27,6 +29,7 @@ void set::setHead(line *visitedLine) {
         tmp = tmp->nextLine;
     }
     assert(inList);
+    printf("Here5\n");
 
     if (visitedLine == this->head)
         return;
@@ -127,7 +130,7 @@ void Cache::HandleRequest(uint64_t addr, int bytes, int read,
             //fetch again
             bool t = AfterFetachRequest(visitedLine, read, bytes, content);
             // it must be hit
-            assert(!t);
+            assert(t);
         }
         else if (read == 0) {
 
@@ -144,7 +147,7 @@ void Cache::HandleRequest(uint64_t addr, int bytes, int read,
                 visitedLine->tag = this->request_tag;
                 // then write again
                 bool t = AfterFetachRequest(visitedLine, read, bytes, content);
-                assert(!t);
+                assert(t);
                 if (this->config_.write_through == 0) {
                     visitedLine->dirty = 1;
                 }
@@ -242,16 +245,17 @@ Cache::AfterFetachRequest(line* visitedLine, int read,
         printf("read num error\n");
         assert(false);
     }
+    return TRUE;
 }
 
 int Cache::ReplaceDecision(uint64_t addr, int read, int bytes, char *content,
                     int &time) {
 
-    this->request_tag = addr >> (this->t + this->b);
+    this->request_tag = getRES(addr, this->s+this->b,this->t);
 
-    this->request_s = (addr << this->t ) >> (this->t + this->b);
+    this->request_s = getRES(addr, this->b, this->s);
 
-    this->request_offset = (addr << (this->t + this->s)) >> (this->t + this->s);
+    this->request_offset = getRES(addr, 0, this->b);
 
     printf("This request tag is 0x%x, set num is 0x%x, request offset is 0x%x\n"
         , this->request_tag, this->request_s, this->request_offset);
@@ -281,10 +285,12 @@ int Cache::ReplaceDecision(uint64_t addr, int read, int bytes, char *content,
                 char * content_Baddr = (tmp->content + this->request_offset);
 
                 int i = 0;
+                printf("bytes is %d\n",bytes);
                 while(i != bytes) {
                     *(content + i) = *(content_Baddr + i);
                     i++;
                 }
+                printf("Here1\n");
 
             }
             // 0 for write 
@@ -320,9 +326,10 @@ int Cache::ReplaceDecision(uint64_t addr, int read, int bytes, char *content,
             }
 
 
-
+            printf("Here2\n");
             //hit , move the hit line to head
             the_set->setHead(tmp);
+            printf("Here3\n");
             // line * pre = tmp->preLine;
             // line * next = tmp->nextLine;
             // if (pre != NULL)
@@ -395,4 +402,14 @@ int Cache::PrefetchDecision() {
 }
 
 void Cache::PrefetchAlgorithm() {
+}
+
+uint64_t Cache::getRES(uint64_t addr, int rshift, int t){
+    uint64_t res = addr >> rshift;
+    for (int i = 0;i < 64;i++) {
+        if (i >= t) {
+            res &= ~((uint64_t)1 << i);
+        }
+    }
+    return res;
 }

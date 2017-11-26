@@ -21,15 +21,26 @@ void set::setHead(line *visitedLine) {
     bool inList = false;
     line *tmp = this->head;
     printf("Here4\n");
+
+
+
     while(tmp != NULL) {
         // the visited line is in this set
         if (visitedLine == tmp) {
             inList = true;
         }
+        // if (tmp->valid) {
+        //     printf("tag %x(pre tag %x)  ->  ",tmp->tag ,(tmp->preLine == NULL)?
+        //         0:tmp->preLine->tag
+        //         );
+        // }else {
+        //     printf("invalid ->");
+        // }
         tmp = tmp->nextLine;
+
     }
     assert(inList);
-    printf("Here5\n");
+    printf("\nHere5\n");
 
     if (visitedLine == this->head)
         return;
@@ -44,9 +55,12 @@ void set::setHead(line *visitedLine) {
 
     visitedLine->preLine = NULL;
     visitedLine->nextLine = this->head;
+    this->head->preLine = visitedLine;
 
 
     this->head = visitedLine;
+
+    assert(this->head->nextLine->nextLine != this->head);
 }
 
 line* set::getEndLine() {

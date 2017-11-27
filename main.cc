@@ -4,13 +4,19 @@
 #include <fstream>
 using namespace std;
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        printf("Wrong number of arguments\n");
+        printf("Usage: ./sim pathOfTraceFile\n");
+        return 0;
+    }
     Memory m;
     Cache l1;
     l1.SetLower(&m);
 
     StorageStats s;
     s.access_time = 0; 
+    s.access_counter = 0;
     m.SetStats(s);
     l1.SetStats(s);
 
@@ -28,15 +34,15 @@ int main(void) {
     // set the cache config
     CacheConfig_ config;
 
-    config.size = 32 MB;
+    config.size = 1 MB;
 
-    config.associativity = 256;
+    config.associativity = 2;
 
     config.set_num = 128;
 
 
-    config.write_through = 0;
-    config.write_allocate = 1;
+    config.write_through = 1;
+    config.write_allocate = 0;
 
     l1.SetConfig(config);
 
@@ -55,7 +61,7 @@ int main(void) {
 // #endif
 //     l1.HandleRequest(1024, 0, 1, content, hit, time);
 //     printf("Request access time: %dns\n", time);
-    ifstream trace_file("../trace/2.trace");
+    ifstream trace_file(argv[1]);
 
     char c;
     uint64_t addr;
@@ -69,7 +75,7 @@ int main(void) {
         else
             read = 0;
         printf("\n%c  %x\n", c, addr);
-        
+
         l1.HandleRequest(addr, 0, read, content, hit, time);
 
         
